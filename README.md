@@ -4,9 +4,9 @@
 
 Nhóm 1:
 
-- Trần Hải Đăng
-- Hồ Tấn Đạt
-- Trần Hoàng Phương
+- Trần Hải Đăng (AC3 + Experiments)
+- Hồ Tấn Đạt (Data + CSP Model)
+- Trần Hoàng Phương (Backtracking + Forward Checking)
 
 Nhóm 2:
 
