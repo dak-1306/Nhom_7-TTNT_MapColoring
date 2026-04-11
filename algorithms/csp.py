@@ -2,27 +2,22 @@
 Module CSP (Constraint Satisfaction Problem) - Bài toán Thỏa mãn Ràng buộc
 Tô màu Bản đồ Việt Nam
 
-═══════════════════════════════════════════════════════════════════════════════
 MÔ TẢ:
     Module này cung cấp framework CSP tổng quát để giải các bài toán 
     Constraint Satisfaction Problem (CSP), đặc biệt thiết kế cho bài toán 
     tô màu bản đồ các tỉnh thành Việt Nam.
 
 CÁC THÀNH PHẦN CHÍNH CỦA CSP:
-    
     1. VARIABLES (Biến):
        - Các đối tượng cần được gán giá trị
        - Ví dụ: Hà Nội, Hồ Chí Minh, Đà Nẵng, ...
-    
     2. DOMAINS (Miền giá trị):
        - Tập hợp các giá trị có thể gán cho mỗi biến
        - Ví dụ: {"Hà Nội": ["Đỏ", "Xanh", "Vàng", "Tím"], ...}
-    
     3. NEIGHBORS (Láng giềng):
        - Mối quan hệ kề nhau / liên hệ giữa các biến
        - Ví dụ: {"Hà Nội": ["Hưng Yên", "Bắc Ninh", "Vĩnh Phúc"], ...}
        - Từ đây ta biết biến nào có ràng buộc với nhau
-    
     4. CONSTRAINT FUNCTION (Hàm ràng buộc):
        - Kiểm tra tính hợp lệ của các phép gán
        - Ví dụ: Hai tỉnh kề nhau không được cùng màu
@@ -35,7 +30,6 @@ VỀ BÀI TOÁN TÔ MÀU:
 CÁCH SỬ DỤNG:
     Các thuật toán (Backtracking, Forward Checking, AC-3) sẽ sử dụng 
     CSP này để tìm giải pháp tối ưu cho bài toán tô màu.
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import json
@@ -46,25 +40,19 @@ from pathlib import Path
 class CSP:
     """
     Lớp CSP (Constraint Satisfaction Problem) - Bài toán Thỏa mãn Ràng buộc
-    
-    ═══════════════════════════════════════════════════════════════════════════
     MỤC ĐÍCH:
         - Biểu diễn một bài toán thỏa mãn ràng buộc dưới dạng OOP
         - Cung cấp các phương thức để kiểm tra tính hợp lệ của phép gán
         - Được tái sử dụng bởi các thuật toán giải (Backtracking, etc.)
-    
     CỤC BỘ:
         - self.variables: Danh sách các biến (tỉnh thành)
         - self.domains: Dictionary ánh xạ biến → danh sách giá trị
         - self.neighbors: Dictionary ánh xạ biến → danh sách biến kề nhau
         - self.constraint: Hàm kiểm tra ràng buộc
-    
     ĐẶC TÍNH:
         - Framework tổng quát, không hardcode bài toán cụ thể
         - Có thể tái sử dụng cho các bài toán CSP khác
         - Đảm bảo tính đúng đắn của dữ liệu qua kiểm tra đầu vào
-    
-    ═══════════════════════════════════════════════════════════════════════════
     """
     
     def __init__(
@@ -77,10 +65,7 @@ class CSP:
         """
         Khởi tạo một instance CSP (bài toán thỏa mãn ràng buộc).
         
-        ═══════════════════════════════════════════════════════════════════════
         THAM SỐ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         variables (List[str]):
             Danh sách tên các biến cần gán giá trị.
             Ví dụ: ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng", ...]
@@ -108,7 +93,6 @@ class CSP:
         
         constraint (Callable[[str, Any, str, Any], bool]):
             Hàm kiểm tra ràng buộc giữa hai biến kề nhau.
-            
             Chữ ký: constraint(var1, val1, var2, val2) → bool
             
             Tham số hàm:
@@ -120,24 +104,17 @@ class CSP:
             Trả về:
                 - True: Nếu (var1=val1, var2=val2) là hợp lệ
                 - False: Nếu vi phạm ràng buộc
-            
             Ví dụ hàm mặc định (cho tô màu):
                 Trả về True nếu val1 != val2
                 (Hai tỉnh kề nhau không được cùng màu)
         
-        ═══════════════════════════════════════════════════════════════════════
         NGOẠI LỆ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         ValueError:
             - Biến không có domain được định nghĩa
             - Domain của biến là rỗng
             - Láng giềng tham chiếu tới biến không tồn tại
         
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ SỬ DỤNG:
-        ═══════════════════════════════════════════════════════════════════════
-        
         >>> variables = ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng"]
         >>> domains = {
         ...     "Hà Nội": ["Đỏ", "Xanh", "Vàng"],
@@ -152,7 +129,6 @@ class CSP:
         >>> csp = CSP(variables, domains, neighbors, default_constraint)
         >>> # Giờ có thể sử dụng csp với các thuật toán Backtracking, AC-3, ...
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         # Lưu trữ dữ liệu đầu vào
         self.variables: List[str] = variables
@@ -167,25 +143,16 @@ class CSP:
         """
         Kiểm tra tính hợp lệ của dữ liệu đầu vào CSP.
         
-        ═══════════════════════════════════════════════════════════════════════
         CÔNG VIỆC:
-        ═══════════════════════════════════════════════════════════════════════
-        
         1. KIỂM TRA VARIABLES VÀ DOMAINS:
            - Mỗi biến trong self.variables phải có entry trong self.domains
            - Domain của mỗi biến không được rỗng
-        
         2. KIỂM TRA NEIGHBORS:
            - Mỗi biến trong neighbors phải nằm trong variables
            - Mỗi láng giềng phải là một biến hợp lệ
-        
-        ═══════════════════════════════════════════════════════════════════════
+
         NGOẠI LỆ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         ValueError: Nếu bất kỳ kiểm tra nào không hợp lệ
-        
-        ═══════════════════════════════════════════════════════════════════════
         """
         # 1. Kiểm tra mỗi biến có domain không
         for var in self.variables:
@@ -218,39 +185,26 @@ class CSP:
         """
         Kiểm tra xem phép gán có hoàn chỉnh không (tất cả biến đã được gán).
         
-        ═══════════════════════════════════════════════════════════════════════
         ĐỊnH NGHĨA:
-        ═══════════════════════════════════════════════════════════════════════
-        
         Một phép gán được gọi là "hoàn chỉnh" nếu tất cả các biến đều đã
         được gán một giá trị. Đây là điều kiện dừng của thuật toán tìm kiếm.
         
-        ═══════════════════════════════════════════════════════════════════════
         THAM SỐ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         assignment (Dict[str, str]):
             Dictionary ánh xạ biến → giá trị được gán.
             Ví dụ: {"Hà Nội": "Đỏ", "Hồ Chí Minh": "Xanh"}
             - Một số biến có thể chưa được gán (dictionary chưa đầy đủ)
             - Hoặc tất cả đã được gán
         
-        ═══════════════════════════════════════════════════════════════════════
         TRẢ VỀ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         bool:
             - True: Nếu len(assignment) == len(self.variables)
                     (Tất cả biến đều có giá trị)
             - False: Nếu len(assignment) < len(self.variables)
                      (Vẫn còn biến chưa gán)
         
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         Giả sử CSP có 5 tỉnh: Hà Nội, Hồ Chí Minh, Đà Nẵng, Huế, Hải Phòng
-        
         >>> csp.is_complete({})
         False  # 0 tỉnh được gán, cần 5
         
@@ -267,7 +221,6 @@ class CSP:
         >>> csp.is_complete(assignment)
         True  # 5 tỉnh được gán, cần 5 → hoàn chỉnh!
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         return len(assignment) == len(self.variables)
     
@@ -280,10 +233,7 @@ class CSP:
         """
         Kiểm tra xem gán giá trị cho một biến có hợp lệ không (không vi phạm ràng buộc).
         
-        ═══════════════════════════════════════════════════════════════════════
         ĐỊnH NGHĨA:
-        ═══════════════════════════════════════════════════════════════════════
-        
         Một phép gán (variable = value) được gọi là "hợp lệ" nếu:
         1. Biến tồn tại trong CSP
         2. Giá trị nằm trong domain của biến
@@ -292,10 +242,7 @@ class CSP:
         Lưu ý: Hàm chỉ kiểm tra các láng giềng ĐÃ ĐƯỢC GÁN, 
                không kiểm tra những láng giềng chưa gán.
         
-        ═══════════════════════════════════════════════════════════════════════
         THAM SỐ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         variable (str):
             Tên biến cần gán giá trị.
             Ví dụ: "Hà Nội"
@@ -309,18 +256,12 @@ class CSP:
             Ví dụ: {"Hưng Yên": "Đỏ", "Bắc Ninh": "Xanh"}
             - Dùng để kiểm tra ràng buộc với các láng giềng đã gán
         
-        ═══════════════════════════════════════════════════════════════════════
         TRẢ VỀ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         bool:
             - True: Nếu phép gán (variable = value) là hợp lệ
             - False: Nếu vi phạm bất kỳ kiểm tra nào
         
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ (TÔ MÀU BẢN ĐỒ):
-        ═══════════════════════════════════════════════════════════════════════
-        
         Giả sử:
         - Hà Nội đã được gán màu Đỏ
         - Hưng Yên là láng giềng (kề nhau) của Hà Nội
@@ -339,16 +280,12 @@ class CSP:
         >>> csp.is_consistent("Hà Nội", "Xanh", {})
         True  # Hợp lệ - không có láng giềng đã gán để kiểm tra
         
-        ═══════════════════════════════════════════════════════════════════════
         QUẢN TRỊ RA):
-        ═══════════════════════════════════════════════════════════════════════
-        
         Hàm này là nền tảng cho các thuật toán như:
         - Backtracking: Kiểm tra trước khi gán
         - Forward Checking: Tính toán consistency
         - AC-3: Cập nhật domains dựa trên consistency
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         # Kiểm tra 1: Biến tồn tại không?
         if variable not in self.variables:
@@ -381,18 +318,12 @@ class CSP:
         """
         Gán một giá trị cho một biến (thêm vào dictionary phép gán).
         
-        ═══════════════════════════════════════════════════════════════════════
         MỤC ĐÍCH:
-        ═══════════════════════════════════════════════════════════════════════
-        
         Đây là hàm trợ giúp (helper) đơn giản để thêm phép gán vào dictionary.
         Trong tương lai, nếu cần tracking lịch sử gán hoặc logging, có thể
         mở rộng hàm này mà không cần sửa các thuật toán khác.
         
-        ═══════════════════════════════════════════════════════════════════════
         THAM SỐ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         variable (str):
             Tên biến cần gán.
             Ví dụ: "Hà Nội"
@@ -409,10 +340,7 @@ class CSP:
             LƯU Ý: Dictionary này sẽ được thay đổi trực tiếp.
                    Không cần gán lại biến.
         
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         >>> assignment = {}
         >>> csp.assign("Hà Nội", "Đỏ", assignment)
         >>> print(assignment)
@@ -422,7 +350,6 @@ class CSP:
         >>> print(assignment)
         {'Hà Nội': 'Đỏ', 'Hồ Chí Minh': 'Xanh'}
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         assignment[variable] = value
     
@@ -434,17 +361,11 @@ class CSP:
         """
         Bỏ gán giá trị của một biến (xóa khỏi dictionary phép gán).
         
-        ═══════════════════════════════════════════════════════════════════════
         MỤC ĐÍCH:
-        ═══════════════════════════════════════════════════════════════════════
-        
         Khi thuật toán Backtracking quay lùi, cần bỏ gán các biến
         để thử nhánh khác. Hàm này thực hiện việc đó.
         
-        ═══════════════════════════════════════════════════════════════════════
         THAM SỐ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         variable (str):
             Tên biến cần bỏ gán.
             Ví dụ: "Hà Nội"
@@ -455,17 +376,9 @@ class CSP:
             Ví dụ (sau): {"Hồ Chí Minh": "Xanh"}
             
             LƯU Ý: Dictionary này sẽ được thay đổi trực tiếp.
-        
-        ═══════════════════════════════════════════════════════════════════════
         NGOẠI LỆ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         KeyError: Nếu biến không nằm trong assignment (chưa gán)
-        
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         >>> assignment = {"Hà Nội": "Đỏ", "Hồ Chí Minh": "Xanh"}
         >>> csp.unassign("Hà Nội", assignment)
         >>> print(assignment)
@@ -474,7 +387,6 @@ class CSP:
         >>> csp.unassign("Hà Nội", assignment)
         # KeyError: 'Hà Nội' (vì đã bỏ gán rồi)
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         del assignment[variable]
     
@@ -482,27 +394,18 @@ class CSP:
         """
         Lấy danh sách các biến chưa được gán giá trị.
         
-        ═══════════════════════════════════════════════════════════════════════
         MỤC ĐÍCH:
-        ═══════════════════════════════════════════════════════════════════════
-        
         Khi tìm kiếm lời giải, cần biết biến nào còn chưa gán để:
         1. Xác định khi nào tìm kiếm xong (all assigned → dừng)
         2. Chọn biến tiếp theo để gán giá trị
         3. Áp dụng heuristic (ví dụ: chọn biến có domain nhỏ nhất)
         
-        ═══════════════════════════════════════════════════════════════════════
         THAM SỐ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         assignment (Dict[str, Any]):
             Phép gán hiện tại.
             Ví dụ: {"Hà Nội": "Đỏ", "Hồ Chí Minh": "Xanh"}
         
-        ═══════════════════════════════════════════════════════════════════════
         TRẢ VỀ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         List[str]:
             Danh sách các biến có trong self.variables nhưng KHÔNG có
             trong assignment.
@@ -510,10 +413,7 @@ class CSP:
             Ví dụ: Nếu self.variables có 5 tỉnh, assignment có 2 tỉnh
                    → trả về 3 tỉnh chưa gán
         
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         >>> csp.variables = ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Huế"]
         
         >>> csp.get_unassigned_variables({})
@@ -533,7 +433,6 @@ class CSP:
         []
         # Tất cả đã gán
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         return [var for var in self.variables if var not in assignment]
     
@@ -541,30 +440,20 @@ class CSP:
         """
         Lấy domain (danh sách giá trị có thể) của một biến.
         
-        ═══════════════════════════════════════════════════════════════════════
         THAM SỐ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         variable (str):
             Tên biến.
             Ví dụ: "Hà Nội"
         
-        ═══════════════════════════════════════════════════════════════════════
         TRẢ VỀ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         List[str]:
             Copy của domain của biến (trả về bản copy để tránh sửa đổi vô ý).
             Ví dụ: ["Đỏ", "Xanh", "Vàng", "Tím"]
         
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         >>> csp.get_domain("Hà Nội")
         ["Đỏ", "Xanh", "Vàng", "Tím"]
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         return self.domains[variable].copy()
     
@@ -572,30 +461,20 @@ class CSP:
         """
         Lấy danh sách các biến kề nhau (láng giềng) của một biến.
         
-        ═══════════════════════════════════════════════════════════════════════
         THAM SỐ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         variable (str):
             Tên biến.
             Ví dụ: "Hà Nội"
         
-        ═══════════════════════════════════════════════════════════════════════
         TRẢ VỀ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         List[str]:
             Copy của danh sách láng giềng (trả về copy để tránh sửa đổi vô ý).
             Ví dụ: ["Hưng Yên", "Bắc Ninh", "Vĩnh Phúc", "Hà Nam"]
         
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         >>> csp.get_neighbors("Hà Nội")
         ["Hưng Yên", "Bắc Ninh", "Vĩnh Phúc", "Hà Nam", "Hòa Bình", "Phú Thọ"]
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         return self.neighbors.get(variable, []).copy()
     
@@ -603,27 +482,20 @@ class CSP:
         """
         Trả về chuỗi biểu diễn CSP (để debugging).
         
-        ═══════════════════════════════════════════════════════════════════════
         VÍ DỤ:
-        ═══════════════════════════════════════════════════════════════════════
-        
         >>> csp = create_map_coloring_csp()
         >>> print(csp)
         CSP(variables=63, domains=63, constraints=203)
         # 63 tỉnh, 63 domain, tổng 203 cạnh kề nhau
         
-        ═══════════════════════════════════════════════════════════════════════
         """
         return (
             f"CSP(variables={len(self.variables)}, "
             f"domains={len(self.domains)}, "
             f"constraints={sum(len(n) for n in self.neighbors.values())})"
         )
-
-
-# ╔═══════════════════════════════════════════════════════════════════════════╗
+    
 # ║                    HÀM RÀNG BUỘC MẶC ĐỊNH (DEFAULT)                       ║
-# ╚═══════════════════════════════════════════════════════════════════════════╝
 
 def default_constraint(
     var1: str,
@@ -635,9 +507,7 @@ def default_constraint(
     Hàm ràng buộc mặc định cho bài toán tô màu bản đồ.
     
     ═══════════════════════════════════════════════════════════════════════════
-    ĐỊNH NGHĨA RÀNG BUỘC:
-    ═══════════════════════════════════════════════════════════════════════════
-    
+    ĐỊNH NGHĨA RÀNG BUỘC:    
     Hai tỉnh thành kề nhau (láng giềng) KHÔNG ĐƯỢC cùng một màu.
     
     Nói cách khác:
@@ -648,10 +518,8 @@ def default_constraint(
     Nếu val1 ≠ val2:
     - → Ràng buộc thỏa mãn → trả về True
     
-    ═══════════════════════════════════════════════════════════════════════════
-    THAM SỐ:
-    ═══════════════════════════════════════════════════════════════════════════
     
+    THAM SỐ:    
     var1 (str):
         Tên tỉnh thứ nhất.
         Ví dụ: "Hà Nội"
@@ -668,18 +536,13 @@ def default_constraint(
         Màu gán cho tỉnh thứ hai.
         Ví dụ: "Xanh"
     
-    ═══════════════════════════════════════════════════════════════════════════
     TRẢ VỀ:
-    ═══════════════════════════════════════════════════════════════════════════
     
     bool:
         - True: Nếu val1 ≠ val2 (màu khác nhau - hợp lệ)
         - False: Nếu val1 == val2 (cùng màu - vi phạm ràng buộc)
     
-    ═══════════════════════════════════════════════════════════════════════════
     VÍ DỤ:
-    ═══════════════════════════════════════════════════════════════════════════
-    
     >>> default_constraint("Hà Nội", "Đỏ", "Hưng Yên", "Xanh")
     True   # Hợp lệ - hai màu khác nhau
     
@@ -689,14 +552,12 @@ def default_constraint(
     >>> default_constraint("Hà Nội", "Xanh", "Hưng Yên", "Vàng")
     True   # Hợp lệ - hai màu khác nhau
     
-    ═══════════════════════════════════════════════════════════════════════════
     """
     return val1 != val2
 
 
-# ╔═══════════════════════════════════════════════════════════════════════════╗
+# 
 # ║               HÀM TẠO CSP TỪ FILE JSON (HELPER FUNCTION)                  ║
-# ╚═══════════════════════════════════════════════════════════════════════════╝
 
 def create_map_coloring_csp(
     provinces_file: Optional[str] = None,
@@ -705,19 +566,13 @@ def create_map_coloring_csp(
 ) -> CSP:
     """
     Tạo một instance CSP cho bài toán tô màu bản đồ Việt Nam.
-    
-    ═══════════════════════════════════════════════════════════════════════════
-    MỤC ĐÍCH:
-    ═══════════════════════════════════════════════════════════════════════════
-    
+
+    MỤC ĐÍCH:    
     Hàm này là một "hàm trợ giúp" (helper function) để tạo CSP từ dữ liệu
     được lưu trong các file JSON. Thay vì tạo CSP thủ công, chỉ cần
     gọi hàm này là xong.
     
-    ═══════════════════════════════════════════════════════════════════════════
-    THAM SỐ:
-    ═══════════════════════════════════════════════════════════════════════════
-    
+    THAM SỐ:    
     provinces_file (Optional[str]):
         Đường dẫn tới file JSON chứa danh sách các tỉnh thành.
         Nếu None → sử dụng đường dẫn mặc định: "data/vietnam_provinces.json"
@@ -733,18 +588,12 @@ def create_map_coloring_csp(
         Nếu None → sử dụng đường dẫn mặc định: "data/colors.json"
         Ví dụ: "data/colors.json"
     
-    ═══════════════════════════════════════════════════════════════════════════
-    TRẢ VỀ:
-    ═══════════════════════════════════════════════════════════════════════════
-    
+    TRẢ VỀ:    
     CSP:
         Một instance CSP hoàn chỉnh, sẵn sàng để sử dụng với các thuật toán
         Backtracking, Forward Checking, AC-3.
-    
-    ═══════════════════════════════════════════════════════════════════════════
-    NGOẠI LỆ:
-    ═══════════════════════════════════════════════════════════════════════════
-    
+
+    NGOẠI LỆ:    
     FileNotFoundError:
         Nếu một trong các file JSON không tìm thấy.
         → Kiểm tra đường dẫn file hoặc chắc chắn file tồn tại.
@@ -756,21 +605,15 @@ def create_map_coloring_csp(
     ValueError:
         Nếu dữ liệu trong file không hợp lệ (thông qua CSP._validate_input).
     
-    ═══════════════════════════════════════════════════════════════════════════
-    QUẢN TRỊ ĐỊA PHƯƠNG:
-    ═══════════════════════════════════════════════════════════════════════════
-    
+    QUẢN TRỊ ĐỊA PHƯƠNG:    
     Domains (Miền giá trị):
         Mỗi tỉnh được gán cùng một domain: danh sách tất cả các màu.
         Ví dụ: {"Hà Nội": ["Đỏ", "Xanh", "Vàng", "Tím"], ...}
         
         Lý do: Bất cứ tỉnh nào cũng có thể được tô bất kỳ màu nào
                (trừ khi bị ràng buộc bởi láng giềng đã gán).
-    
-    ═══════════════════════════════════════════════════════════════════════════
+
     VÍ DỤ SỬ DỤNG:
-    ═══════════════════════════════════════════════════════════════════════════
-    
     # Cách 1: Sử dụng đường dẫn mặc định
     >>> csp = create_map_coloring_csp()
     >>> print(csp)
@@ -789,7 +632,7 @@ def create_map_coloring_csp(
     Số tỉnh: 63
     >>> print(f"Số màu: {len(csp.get_domain(csp.variables[0]))}")
     Số màu: 4
-      ═══════════════════════════════════════════════════════════════════════════
+      
     """
     # Thiết lập đường dẫn mặc định nếu không được cung cấp
     if provinces_file is None:
@@ -845,18 +688,15 @@ def create_map_coloring_csp(
     return csp
 
 
-# ╔═══════════════════════════════════════════════════════════════════════════╗
+# 
 # ║                         TESTING & VALIDATION                              ║
-# ╚═══════════════════════════════════════════════════════════════════════════╝
+
 
 if __name__ == "__main__":
     """
     Phần kiểm tra (testing) - chạy các test cơ bản để xác minh CSP hoạt động đúng.
     
-    ═══════════════════════════════════════════════════════════════════════════
-    CÁC TEST:
-    ═══════════════════════════════════════════════════════════════════════════
-    
+    CÁC TEST:    
     1. Tạo CSP từ dữ liệu file JSON
     2. Hiển thị thông tin CSP
     3. Kiểm tra is_complete()
@@ -865,7 +705,6 @@ if __name__ == "__main__":
     6. Kiểm tra get_unassigned_variables()
     7. Kiểm tra get_neighbors()
     
-    ═══════════════════════════════════════════════════════════════════════════
     """
     
     print("=" * 80)
