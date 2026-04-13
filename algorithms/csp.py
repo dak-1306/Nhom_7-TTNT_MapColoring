@@ -563,6 +563,7 @@ def create_map_coloring_csp(
     provinces_file: Optional[str] = None,
     adjacency_file: Optional[str] = None,
     colors_file: Optional[str] = None,
+    use_34_regions: bool = False,
 ) -> CSP:
     """
     Tạo một instance CSP cho bài toán tô màu bản đồ Việt Nam.
