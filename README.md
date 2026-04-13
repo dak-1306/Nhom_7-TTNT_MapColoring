@@ -79,12 +79,11 @@ map-coloring-project/
         │                               │
    data/                           visualization/
    algorithms/                     ui/
-   experiments/                    charts/
-                                   report/
+   charts/                         demo/
+   experiments/                    slide/
+
 
 ```
-
-**slide/ và demo/ cả 2 nhóm làm chung**
 
 ## Luồng dữ liệu giữa 2 nhóm
 
@@ -94,16 +93,15 @@ Adjacency + Algorithms
         ↓
 Run experiments
         ↓
-results.csv
+Draw charts
         ↓
+solution.json + results.csv
 -------------------------
         ↓
 Nhóm 2:
 Read results.csv
         ↓
-Draw charts
-        ↓
 Visualization map
         ↓
-Slide + Report + Demo
+Slide + Demo
 ```
