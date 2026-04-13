@@ -1,22 +1,19 @@
-import json
+import sys
 import os
 
+# Ensure project root is on sys.path so we can import the algorithms module
 here = os.path.dirname(__file__)
-# data is in the repository root `data/` — go up one level from `test/`
 root = os.path.abspath(os.path.join(here, '..'))
-provinces_path = os.path.join(root, 'data', 'vietnam_provinces.json')
-adj_path = os.path.join(root, 'data', 'adjacency.json')
+if root not in sys.path:
+    sys.path.insert(0, root)
 
-with open(provinces_path, encoding='utf-8') as f:
-    data = json.load(f)
-provinces = data['provinces']
-colors = data['colors']
+from algorithms.csp import create_map_coloring_csp
 
-with open(adj_path, encoding='utf-8') as f:
-    adjacency = json.load(f)
-
-# build domains
-domains = {p: list(colors) for p in provinces}
+# Load CSP (uses data/*.json by default) and extract variables/domains/neighbors
+csp = create_map_coloring_csp()
+provinces = csp.variables
+domains = csp.domains
+adjacency = csp.neighbors
 
 constraint_checks = 0
 
