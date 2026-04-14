@@ -1,0 +1,43 @@
+{
+  "solution": {
+    "Hà Nội": "Đỏ",
+    "Hồ Chí Minh": "Đỏ",
+    "Hải Phòng": "Xanh",
+    "Đà Nẵng": "Đỏ",
+    "Huế": "Xanh",
+    "Cần Thơ": "Xanh",
+    "Tuyên Quang": "Đỏ",
+    "Cao Bằng": "Xanh",
+    "Lai Châu": "Đỏ",
+    "Lào Cai": "Vàng",
+    "Thái Nguyên": "Vàng",
+    "Điện Biên": "Xanh",
+    "Lạng Sơn": "Đỏ",
+    "Sơn La": "Tím",
+    "Phú Thọ": "Xanh",
+    "Bắc Ninh": "Xanh",
+    "Quảng Ninh": "Vàng",
+    "Hưng Yên": "Vàng",
+    "Ninh Bình": "Xanh",
+    "Thanh Hóa": "Đỏ",
+    "Nghệ An": "Xanh",
+    "Hà Tĩnh": "Đỏ",
+    "Quảng Trị": "Vàng",
+    "Quảng Ngãi": "Xanh",
+    "Gia Lai": "Vàng",
+    "Đắk Lắk": "Đỏ",
+    "Khánh Hòa": "Xanh",
+    "Lâm Đồng": "Tím",
+    "Đồng Nai": "Xanh",
+    "Tây Ninh": "Vàng",
+    "Đồng Tháp": "Đỏ",
+    "An Giang": "Vàng",
+    "Vĩnh Long": "Đỏ",
+    "Cà Mau": "Xanh"
+  },
+  "meta": {
+    "time": 0.00011389999417588115,
+    "steps": 69,
+    "checks": 160
+  }
+}

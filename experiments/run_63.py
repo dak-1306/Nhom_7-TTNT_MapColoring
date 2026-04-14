@@ -30,8 +30,8 @@ def main():
     data = ROOT / "data"
 
     csp = create_map_coloring_csp(
-        provinces_file=str(data / "vietnam_provinces.json"),
-        adjacency_file=str(data / "adjacency.json"),
+        provinces_file=str(data / "vietnam_regions_63.json"),
+        adjacency_file=str(data / "adjacency_63.json"),
         colors_file=str(data / "colors.json"),
     )
 
@@ -43,7 +43,7 @@ def main():
     solution = result["solution"]
 
     # Save JSON for frontend
-    out_path = ROOT / "experiments" / "results" / "solution.json"
+    out_path = ROOT / "experiments" / "results" / "solution_63.json"
     out_path.parent.mkdir(exist_ok=True)
 
     with out_path.open("w", encoding="utf-8") as f:
