@@ -68,7 +68,7 @@ def measure_ac3(csp):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--repeats", type=int, default=3)
-    parser.add_argument("--out", type=str, default=str(ROOT / "experiments" / "results" / "results.csv"))
+    parser.add_argument("--out", type=str, default=str(ROOT / "experiments" / "results" / "results_34.csv"))
     args = parser.parse_args()
 
     # Test nhiều số màu
@@ -86,7 +86,11 @@ def main():
         print(f"\n===== COLORS = {num_colors} =====")
 
         # Tạo CSP (từ file dữ liệu) và giới hạn số màu trong domains
-        csp = create_map_coloring_csp()
+        csp = create_map_coloring_csp(
+            provinces_file=str(ROOT / "data" / "vietnam_regions_34.json"),
+            adjacency_file=str(ROOT / "data" / "adjacency_34.json"),
+            colors_file=str(ROOT / "data" / "colors.json"),
+        )
 
         # Trim domains to the requested number of colors (if necessary)
         try:
