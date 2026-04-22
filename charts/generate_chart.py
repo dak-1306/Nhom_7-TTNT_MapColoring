@@ -114,35 +114,61 @@ def plot_chart(grouped_data, title, ylabel, filename):
 # MAIN
 # =========================
 def main():
-    csv_path = "experiments/results/results.csv"
+    csv_path_63 = "experiments/results/results_63.csv"
+    csv_path_34 = "experiments/results/results_34.csv"
 
-    data = load_data(csv_path)
+    data_63 = load_data(csv_path_63)
+    data_34 = load_data(csv_path_34)
 
     # TIME
-    time_data = group_by_colors(data, "time")
+    time_data_34 = group_by_colors(data_34, "time")
     plot_chart(
-        time_data,
-        title="Execution Time Comparison",
+        time_data_34,
+        title="Execution Time Comparison (34 provinces)",
         ylabel="Time (seconds)",
-        filename="time_chart.png"
+        filename="time_chart_34.png"
+    )
+
+    time_data_63 = group_by_colors(data_63, "time")
+    plot_chart(
+        time_data_63,
+        title="Execution Time Comparison (63 provinces)",
+        ylabel="Time (seconds)",
+        filename="time_chart_63.png"
     )
 
     # STEPS
-    steps_data = group_by_colors(data, "steps")
+    steps_data_34 = group_by_colors(data_34, "steps")
     plot_chart(
-        steps_data,
-        title="Steps Comparison",
+        steps_data_34,
+        title="Steps Comparison (34 provinces)",
         ylabel="Number of Steps",
-        filename="steps_chart.png"
+        filename="steps_chart_34.png"
+    )
+
+    steps_data_63 = group_by_colors(data_63, "steps")
+    plot_chart(
+        steps_data_63,
+        title="Steps Comparison (63 provinces)",
+        ylabel="Number of Steps",
+        filename="steps_chart_63.png"
     )
 
     # CHECKS
-    checks_data = group_by_colors(data, "checks")
+    checks_data_34 = group_by_colors(data_34, "checks")
     plot_chart(
-        checks_data,
-        title="Constraint Checks Comparison",
+        checks_data_34,
+        title="Constraint Checks Comparison (34 provinces)",
         ylabel="Number of Checks",
-        filename="checks_chart.png"
+        filename="checks_chart_34.png"
+    )
+
+    checks_data_63 = group_by_colors(data_63, "checks")
+    plot_chart(
+        checks_data_63,
+        title="Constraint Checks Comparison (63 provinces)",
+        ylabel="Number of Checks",
+        filename="checks_chart_63.png"
     )
 
 

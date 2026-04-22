@@ -674,6 +674,9 @@ def create_map_coloring_csp(
     
     with open(colors_path, "r", encoding="utf-8") as f:
         colors = json.load(f)
+        
+    if isinstance(colors, dict):
+        colors = list(colors.keys())
     
     # Tạo domains: mỗi tỉnh có thể được tô bất kỳ màu nào
     domains = {province: colors.copy() for province in provinces}
