@@ -34,7 +34,7 @@ UNASSIGNED = "#D8D6D0"
 ALGORITHMS = ["AC-3", "Forward Checking"]
 CANVAS_WIDTH = 900
 CANVAS_HEIGHT = 760
-REMOTE_ISLAND_MIN_LON = 111.5
+REMOTE_ISLAND_MIN_LON = 113.0  # Filter only far eastern outliers, allow Hoang Sa and Truong Sa (110-112°E)
 
 FALLBACK_COLOR_MAP = {
     "Do": "#FF0000",
@@ -240,7 +240,7 @@ def load_geojson_shapes(path: Path) -> tuple[dict[str, list[list[tuple[float, fl
 
             xs = [point[0] for point in ring]
             ys = [point[1] for point in ring]
-            if min(xs) >= REMOTE_ISLAND_MIN_LON:
+            if max(xs) > REMOTE_ISLAND_MIN_LON:
                 continue
 
             rings.append(ring)
