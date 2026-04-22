@@ -12,11 +12,14 @@ from visualization.name_normalizer import canonical_province_name
 
 
 ROOT = Path(__file__).resolve().parent
-GEOJSON_PATH = ROOT / "data" / "vietnam_provinces.geojson"
-SOLUTION_PATH = ROOT / "data" / "solution.json"
-RESULTS_PATH = ROOT / "data" / "results_63.csv"
-ADJACENCY_PATH = ROOT / "data" / "adjacency_63.json"
-COLORS_PATH = ROOT / "data" / "colors.json"
+DATA_PATH = ROOT / "data"
+EXPERIMENTS_PATH = ROOT / "experiments" / "results"
+
+GEOJSON_PATH = DATA_PATH / "vietnam_provinces.geojson"
+SOLUTION_PATH = EXPERIMENTS_PATH / "solution_63.json"
+RESULTS_PATH = EXPERIMENTS_PATH / "results_63.csv"
+ADJACENCY_PATH = DATA_PATH / "adjacency_63.json"
+COLORS_PATH = DATA_PATH / "colors.json"
 
 APP_BG = "#F6F1E6"
 SIDEBAR_BG = "#ECE2CE"
@@ -110,6 +113,14 @@ COLOR_VALUE_MAP = load_color_values(COLORS_PATH)
 
 
 def load_solution_data(path: Path) -> dict:
+    # Try to load from specified path, fallback to data/solution.json if not found
+    if not path.exists():
+        fallback_path = Path(__file__).resolve().parent / "data" / "solution.json"
+        if fallback_path.exists():
+            path = fallback_path
+        else:
+            raise FileNotFoundError(f"Solution file not found at {path} or {fallback_path}")
+    
     payload = json.loads(path.read_text(encoding="utf-8"))
     assignment_raw = payload.get("solution", {})
     assignment = {
@@ -133,6 +144,14 @@ def load_solution_data(path: Path) -> dict:
 
 
 def load_results(path: Path) -> list[dict]:
+    # Try to load from specified path, fallback to data/results_63.csv if not found
+    if not path.exists():
+        fallback_path = Path(__file__).resolve().parent / "data" / "results_63.csv"
+        if fallback_path.exists():
+            path = fallback_path
+        else:
+            raise FileNotFoundError(f"Results file not found at {path} or {fallback_path}")
+    
     rows: list[dict] = []
     with path.open("r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
