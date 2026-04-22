@@ -10,10 +10,12 @@ sys.path.insert(0, str(ROOT))
 
 from algorithms.csp import create_map_coloring_csp
 from algorithms.backtracking import BacktrackingSolver
+from algorithms.forward_checking import ForwardCheckingSolver
+from algorithms.ac3 import AC3Solver
 
 
-def run_backtracking(csp):
-    solver = BacktrackingSolver()
+def run_solver(solver_class, csp):
+    solver = solver_class()
     start = time.perf_counter()
     solution, steps, checks = solver.solve(csp)
     elapsed = time.perf_counter() - start
@@ -35,12 +37,33 @@ def main():
         colors_file=str(data / "colors.json"),
     )
 
-    print("Running CSP solver...")
+    print("Running CSP solvers for 34 regions...")
 
-    csp_copy = deepcopy(csp)
-    result = run_backtracking(csp_copy)
+    solvers = {
+        "Backtracking": BacktrackingSolver,
+        "Forward Checking": ForwardCheckingSolver,
+        "AC-3": AC3Solver
+    }
 
-    solution = result["solution"]
+    results_meta = {}
+    best_solution = None
+
+    for name, solver_class in solvers.items():
+        print(f"Running {name}...")
+        csp_copy = deepcopy(csp)
+        result = run_solver(solver_class, csp_copy)
+
+        results_meta[name] = {
+            "time": result["time"],
+            "steps": result["steps"],
+            "checks": result["checks"]
+        }
+
+        # Keep the first valid solution for frontend rendering
+        if best_solution is None:
+            best_solution = result["solution"]
+
+        print(f"  -> Time: {result['time']:.4f}s, Steps: {result['steps']}, Checks: {result['checks']}")
 
     # Save JSON for frontend
     out_path = ROOT / "experiments" / "results" / "solution_34.json"
@@ -48,15 +71,11 @@ def main():
 
     with out_path.open("w", encoding="utf-8") as f:
         json.dump({
-            "solution": solution,
-            "meta": {
-                "time": result["time"],
-                "steps": result["steps"],
-                "checks": result["checks"]
-            }
+            "solution": best_solution,
+            "meta": results_meta
         }, f, ensure_ascii=False, indent=2)
 
-    print(f"Saved solution to: {out_path}")
+    print(f"Saved aggregated solution to: {out_path}")
 
 
 if __name__ == "__main__":

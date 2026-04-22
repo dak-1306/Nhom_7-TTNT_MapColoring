@@ -65,8 +65,20 @@
     "Cà Mau": "Đỏ"
   },
   "meta": {
-    "time": 0.0004661999992094934,
-    "steps": 272,
-    "checks": 858
+    "Backtracking": {
+      "time": 0.0004211999985272996,
+      "steps": 272,
+      "checks": 858
+    },
+    "Forward Checking": {
+      "time": 0.0016818000003695488,
+      "steps": 70,
+      "checks": 909
+    },
+    "AC-3": {
+      "time": 0.007251600000017788,
+      "steps": 272,
+      "checks": 581
+    }
   }
 }

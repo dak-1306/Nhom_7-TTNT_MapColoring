@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT))
 from algorithms.csp import create_map_coloring_csp
 from algorithms.backtracking import BacktrackingSolver
 from algorithms.forward_checking import ForwardCheckingSolver
-from algorithms.ac3 import ac3
+from algorithms.ac3 import ac3, AC3Solver
 
 from experiments.measure_time import measure_solver
 
@@ -33,10 +33,12 @@ def backtracking(csp):
     return BacktrackingSolver().solve(csp)
 
 
-def forward_checking(mac=False):
-    def _run(csp):
-        return ForwardCheckingSolver().solve(csp, mac=mac)
-    return _run
+def forward_checking(csp):
+    return ForwardCheckingSolver().solve(csp, mac=False)
+
+
+def ac3_mac(csp):
+    return AC3Solver().solve(csp)
 
 
 # =========================
@@ -76,8 +78,8 @@ def main():
 
     algorithms = [
         ("Backtracking", backtracking),
-        ("ForwardChecking", forward_checking(False)),
-        ("ForwardChecking_MAC", forward_checking(True)),
+        ("ForwardChecking", forward_checking),
+        ("AC-3", ac3_mac),
     ]
 
     rows = []

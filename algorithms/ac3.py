@@ -114,3 +114,15 @@ def _validate_csp(csp):
         for n in neighbors:
             if n not in csp.variables:
                 raise ValueError(f"Neighbor '{n}' không tồn tại trong variables")
+
+
+from typing import Dict, Any, Optional, Tuple
+
+class AC3Solver:
+    """
+    Trình giải bài toán tô màu bản đồ sử dụng Backtracking kết hợp với AC-3 (MAC - Maintaining Arc Consistency).
+    """
+    def solve(self, csp) -> Tuple[Optional[Dict[str, Any]], int, int]:
+        from .forward_checking import ForwardCheckingSolver
+        solver = ForwardCheckingSolver()
+        return solver.solve(csp, mac=True)

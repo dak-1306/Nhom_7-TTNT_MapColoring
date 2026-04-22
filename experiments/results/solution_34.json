@@ -36,8 +36,20 @@
     "Cà Mau": "Xanh"
   },
   "meta": {
-    "time": 0.00011369999992894009,
-    "steps": 67,
-    "checks": 175
+    "Backtracking": {
+      "time": 0.0001295000038226135,
+      "steps": 67,
+      "checks": 175
+    },
+    "Forward Checking": {
+      "time": 0.00043089999962830916,
+      "steps": 34,
+      "checks": 393
+    },
+    "AC-3": {
+      "time": 0.0009374000001116656,
+      "steps": 67,
+      "checks": 110
+    }
   }
 }
