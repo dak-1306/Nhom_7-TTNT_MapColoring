@@ -63,6 +63,7 @@ class ForwardCheckingSolver:
             ok = True
             if mac:
                 # run AC-3 (MAC): initialize queue with arcs (Xk, var)
+                csp.domains[var] = [value]
                 queue = [(Xk, var) for Xk in csp.get_neighbors(var)]
                 ok = ac3(csp, queue=queue)
             else:

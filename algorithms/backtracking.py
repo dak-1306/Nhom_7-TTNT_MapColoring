@@ -10,8 +10,8 @@ class BacktrackingSolver:
     def is_consistent(self, csp, var: str, value: Any, assignment: Dict[str, Any]) -> bool:
         """Check consistency against assigned neighbors while counting checks."""
         for neighbor in csp.get_neighbors(var):
-            self.constraint_checks += 1
             if neighbor in assignment:
+                self.constraint_checks += 1
                 if not csp.constraint(var, value, neighbor, assignment[neighbor]):
                     return False
         return True
