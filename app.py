@@ -31,7 +31,7 @@ BORDER = "#D9CFBB"
 CANVAS_BG = "#F8F4EC"
 UNASSIGNED = "#D8D6D0"
 
-ALGORITHMS = ["AC-3", "Forward Checking"]
+ALGORITHMS = ["Backtracking", "Forward Checking", "AC-3"]
 CANVAS_WIDTH = 900
 CANVAS_HEIGHT = 760
 REMOTE_ISLAND_MIN_LON = 113.0  # Filter only far eastern outliers, allow Hoang Sa and Truong Sa (110-112°E)
@@ -131,16 +131,32 @@ def load_solution_data(path: Path) -> dict:
         canonical_province_name(province): province
         for province in assignment_raw.keys()
     }
+    meta_raw = payload.get("meta", {})
+    meta_by_algorithm = {}
+
+    if {"time", "steps", "checks"}.issubset(meta_raw.keys()):
+        meta_by_algorithm["Backtracking"] = {
+            "time": float(meta_raw.get("time", 0.0)),
+            "steps": int(meta_raw.get("steps", 0)),
+            "checks": int(meta_raw.get("checks", 0)),
+        }
+    else:
+        for algorithm_name, values in meta_raw.items():
+            if not isinstance(values, dict):
+                continue
+            meta_by_algorithm[normalize_algorithm_name(algorithm_name)] = {
+                "time": float(values.get("time", 0.0)),
+                "steps": int(values.get("steps", 0)),
+                "checks": int(values.get("checks", 0)),
+            }
+
     return {
         "assignment": assignment,
         "sequence": [canonical_province_name(name) for name in assignment_raw.keys()],
         "display_names": display_names,
-        "meta": {
-            "time": float(payload.get("meta", {}).get("time", 0.0)),
-            "steps": int(payload.get("meta", {}).get("steps", 0)),
-            "checks": int(payload.get("meta", {}).get("checks", 0)),
-        },
+        "meta_by_algorithm": meta_by_algorithm,
     }
+
 
 
 def load_results(path: Path) -> list[dict]:
@@ -449,8 +465,8 @@ class MapColoringApp:
             sidebar,
             text=(
                 "Nguồn dữ liệu:\n"
-                "- data/solution.json\n"
-                "- data/results_63.csv\n"
+                "- experiments/results/solution_63.json\n"
+                "- experiments/results/results_63.csv\n"
                 "- data/adjacency_63.json\n"
                 "- data/colors.json\n"
                 "- data/vietnam_provinces.geojson"
@@ -484,8 +500,8 @@ class MapColoringApp:
         map_frame.pack(side="left", fill="both", expand=True)
         ttk.Label(map_frame, text="Bản đồ tô màu", style="Section.TLabel").pack(anchor="w")
         ttk.Label(
-            map_frame,
-            text=f"Bản đồ hiển thị nghiệm {self.solution_color_count} màu hiện có trong solution.json của Nhóm 1.",
+        map_frame,
+        text=f"Bản đồ hiển thị nghiệm {self.solution_color_count} màu hiện có trong solution_63.json của Nhóm 1.",
             style="Subtitle.TLabel",
         ).pack(anchor="w", pady=(2, 10))
 
@@ -553,17 +569,25 @@ class MapColoringApp:
         ).pack(anchor="w")
 
     def refresh_dashboard(self) -> None:
-        selected_row = find_result_row(self.results, self.algorithm_var.get(), self.solution_color_count)
-        if selected_row is None:
-            self.time_var.set("N/A")
-            self.steps_var.set("N/A")
-            self.checks_var.set("N/A")
-            self.status_var.set("Không có thông số phù hợp trong results_63.csv cho lựa chọn hiện tại.")
-        else:
+        selected_algorithm = self.algorithm_var.get()
+        selected_row = find_result_row(self.results, selected_algorithm, self.solution_color_count)
+        selected_meta = self.solution_data["meta_by_algorithm"].get(selected_algorithm)
+
+        if selected_row is not None:
             self.time_var.set(format_time_value(selected_row["time"]))
             self.steps_var.set(f"{selected_row['steps']:,}")
             self.checks_var.set(f"{selected_row['checks']:,}")
-            self.status_var.set("Bấm Run để mô phỏng quá trình tô màu.")
+        elif selected_meta is not None:
+            self.time_var.set(format_time_value(float(selected_meta["time"])))
+            self.steps_var.set(f"{int(selected_meta['steps']):,}")
+            self.checks_var.set(f"{int(selected_meta['checks']):,}")
+        else:
+            self.time_var.set("N/A")
+            self.steps_var.set("N/A")
+            self.checks_var.set("N/A")
+
+        self.status_var.set("Bấm Run để mô phỏng quá trình tô màu.")
+
 
         if self.conflicts:
             conflict_message = f"Cảnh báo: còn {len(self.conflicts)} cặp tỉnh giáp nhau trùng màu theo adjacency_63.json."
@@ -574,7 +598,7 @@ class MapColoringApp:
             f"Thuật toán đang chọn: {self.algorithm_var.get()}\n"
             f"Thông số ở trên lấy từ results_63.csv của Nhóm 1 với nghiệm {self.solution_color_count} màu.\n"
             f"{conflict_message}\n"
-            "Map đang hiển thị nghiệm cuối từ solution.json; lựa chọn thuật toán dùng để đổi thông số đo."
+            "Map đang hiển thị nghiệm cuối từ solution_63.json; lựa chọn thuật toán dùng để đổi thông số đo."
         )
         self.clear_map()
 
