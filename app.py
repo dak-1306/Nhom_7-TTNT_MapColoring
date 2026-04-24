@@ -13,12 +13,7 @@ from visualization.name_normalizer import canonical_province_name
 
 ROOT = Path(__file__).resolve().parent
 DATA_PATH = ROOT / "data"
-EXPERIMENTS_PATH = ROOT / "experiments" / "results"
 
-GEOJSON_PATH = DATA_PATH / "vietnam_provinces63.geojson"
-SOLUTION_PATH = EXPERIMENTS_PATH / "solution_63.json"
-RESULTS_PATH = EXPERIMENTS_PATH / "results_63.csv"
-ADJACENCY_PATH = DATA_PATH / "adjacency_63.json"
 COLORS_PATH = DATA_PATH / "colors.json"
 
 APP_BG = "#F6F1E6"
@@ -36,6 +31,23 @@ ALGORITHMS = ["Backtracking", "Forward Checking", "AC-3"]
 CANVAS_WIDTH = 920
 CANVAS_HEIGHT = 760
 REMOTE_ISLAND_MIN_LON = 111.5
+
+DATASET_OPTIONS = {
+    "63 tỉnh/thành": {
+        "key": "63",
+        "geojson": DATA_PATH / "vietnam_provinces.geojson",
+        "solution": DATA_PATH / "solution.json",
+        "results": DATA_PATH / "results_63.csv",
+        "adjacency": DATA_PATH / "adjacency_63.json",
+    },
+    "34 tỉnh/thành": {
+        "key": "34",
+        "geojson": DATA_PATH / "vietnam_regions_34.geojson",
+        "solution": DATA_PATH / "solution_34.json",
+        "results": DATA_PATH / "results_34.csv",
+        "adjacency": DATA_PATH / "adjacency_34.json",
+    },
+}
 
 FALLBACK_COLOR_MAP = {
     "Do": "#FF0000",
@@ -108,14 +120,6 @@ COLOR_VALUE_MAP = load_color_values(COLORS_PATH)
 
 
 def load_solution_data(path: Path) -> dict:
-    if not path.exists():
-        # Fallback to data directory
-        fallback_path = Path(__file__).resolve().parent / "data" / "solution.json"
-        if fallback_path.exists():
-            path = fallback_path
-        else:
-            raise FileNotFoundError(f"Solution file not found at {path} or {fallback_path}")
-    
     payload = json.loads(path.read_text(encoding="utf-8"))
     assignment_raw = payload.get("solution", {})
 
@@ -157,15 +161,6 @@ def load_solution_data(path: Path) -> dict:
 
 def load_results(path: Path) -> list[dict]:
     rows: list[dict] = []
-    if not path.exists():
-        # Fallback to data directory if not found
-        fallback_path = Path(__file__).resolve().parent / "data" / "results_63.csv"
-        if fallback_path.exists():
-            path = fallback_path
-        else:
-            print(f"Warning: Results file not found at {path} or {fallback_path}")
-            return rows
-    
     with path.open("r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
         for row in reader:
@@ -326,6 +321,20 @@ class VietnamMapCanvas(tk.Canvas):
         self.bind("<Configure>", self._on_resize)
         self.draw_map()
 
+    def set_map_data(
+        self,
+        province_shapes: dict[str, list[list[tuple[float, float]]]],
+        bounds: tuple[float, float, float, float],
+        island_shapes: dict[str, list[list[tuple[float, float]]]],
+        island_bounds: tuple[float, float, float, float] | None,
+    ) -> None:
+        self.province_shapes = province_shapes
+        self.bounds = bounds
+        self.island_shapes = island_shapes
+        self.island_bounds = island_bounds
+        self.draw_map()
+        self.apply_assignment({}, None)
+
     def _on_resize(self, _event) -> None:
         self.draw_map()
         self.apply_assignment(self.current_assignment, self.current_highlight)
@@ -476,38 +485,24 @@ class MapColoringApp:
         self.root.minsize(1280, 820)
         self.root.configure(bg=APP_BG)
 
-        self.solution_data = load_solution_data(SOLUTION_PATH)
-        self.results = load_results(RESULTS_PATH)
-        self.adjacency = load_adjacency(ADJACENCY_PATH)
-        self.conflicts = validate_assignment(self.solution_data["assignment"], self.adjacency)
-        (
-            self.province_shapes,
-            self.bounds,
-            self.island_shapes,
-            self.island_bounds,
-        ) = load_geojson_shapes(GEOJSON_PATH)
-
-        self.solution_color_count = len(
-            {color for color in self.solution_data["assignment"].values() if color != "Chua to"}
-        )
+        self.dataset_var = tk.StringVar(value="63 tỉnh/thành")
+        self.solution_count_var = tk.StringVar(value="")
+        self.map_subtitle_var = tk.StringVar(value="")
         self.algorithm_var = tk.StringVar(value="Backtracking")
         self.animate_var = tk.BooleanVar(value=True)
         self.time_var = tk.StringVar(value="0.00 ms")
         self.steps_var = tk.StringVar(value="0")
         self.checks_var = tk.StringVar(value="0")
-        self.status_var = tk.StringVar(value="Chọn thuật toán rồi bấm Run để bắt đầu.")
+        self.status_var = tk.StringVar(value="Chọn thuật toán rồi bấm Run.")
         self.info_var = tk.StringVar(value="")
         self.has_run = False
         self.last_run_algorithm: str | None = None
 
         self.animation_job: str | None = None
-        self.sequence = list(self.solution_data["sequence"])
-        self.display_names = dict(self.solution_data["display_names"])
-        self.used_colors = [
-            color for color in ["Do", "Xanh", "Vang", "Tim"]
-            if color in set(self.solution_data["assignment"].values())
-        ]
         self.sequence_index = 0
+        self.current_dataset_key = "63"
+
+        self._load_dataset(self.dataset_var.get())
 
         self._setup_style()
         self._build_ui()
@@ -542,6 +537,17 @@ class MapColoringApp:
         ttk.Label(sidebar, text="Điều khiển", style="SidebarTitle.TLabel").pack(anchor="w")
         ttk.Frame(sidebar, style="Sidebar.TFrame", height=8).pack(anchor="w", pady=(0, 10))
 
+        ttk.Label(sidebar, text="Chế độ bản đồ", style="Sidebar.TLabel").pack(anchor="w")
+        dataset_box = ttk.Combobox(
+            sidebar,
+            textvariable=self.dataset_var,
+            values=list(DATASET_OPTIONS.keys()),
+            state="readonly",
+            width=20,
+        )
+        dataset_box.pack(anchor="w", fill="x", pady=(6, 14))
+        dataset_box.bind("<<ComboboxSelected>>", self._on_dataset_changed)
+
         ttk.Label(sidebar, text="Thuật toán", style="Sidebar.TLabel").pack(anchor="w")
         algorithm_box = ttk.Combobox(
             sidebar,
@@ -554,7 +560,7 @@ class MapColoringApp:
         algorithm_box.bind("<<ComboboxSelected>>", self._on_algorithm_changed)
 
         ttk.Label(sidebar, text="Số màu của nghiệm hiện có", style="Sidebar.TLabel").pack(anchor="w")
-        ttk.Label(sidebar, text=f"{self.solution_color_count} màu", style="Sidebar.TLabel").pack(anchor="w", pady=(6, 14))
+        ttk.Label(sidebar, textvariable=self.solution_count_var, style="Sidebar.TLabel").pack(anchor="w", pady=(6, 14))
 
         tk.Checkbutton(
             sidebar,
@@ -580,7 +586,7 @@ class MapColoringApp:
         ttk.Label(content, text="Map Coloring Vietnam", style="Title.TLabel").pack(anchor="w")
         ttk.Label(
             content,
-            text="Bản desktop bằng tkinter để hiển thị kết quả tô màu bản đồ 63 tỉnh/thành Việt Nam.",
+            text="Bản desktop bằng tkinter để hiển thị kết quả tô màu bản đồ Việt Nam.",
             style="Subtitle.TLabel",
             wraplength=980,
         ).pack(anchor="w", pady=(6, 16))
@@ -599,7 +605,7 @@ class MapColoringApp:
         ttk.Label(map_frame, text="Bản đồ tô màu", style="Section.TLabel").pack(anchor="w")
         ttk.Label(
             map_frame,
-            text=f"Nghiệm hiện có: {self.solution_color_count} màu.",
+            textvariable=self.map_subtitle_var,
             style="Subtitle.TLabel",
             wraplength=920,
         ).pack(anchor="w", pady=(2, 10))
@@ -637,19 +643,9 @@ class MapColoringApp:
         )
         self.status_label.pack(fill="x", pady=(8, 16))
 
-        legend_frame = ttk.Frame(side_panel, style="Card.TFrame", padding=(12, 10))
-        legend_frame.pack(fill="x", pady=(0, 16))
-        ttk.Label(legend_frame, text="Bảng màu", style="CardTitle.TLabel").pack(anchor="w", pady=(0, 6))
-
-        legend_order = [color for color in self.used_colors]
-        legend_order.append("Chua to")
-        for color_key in legend_order:
-            row = ttk.Frame(legend_frame, style="Card.TFrame")
-            row.pack(anchor="w", fill="x", pady=1)
-            swatch = tk.Canvas(row, width=18, height=18, bg=CARD_BG, highlightthickness=0)
-            swatch.pack(side="left")
-            swatch.create_rectangle(1, 1, 17, 17, fill=COLOR_VALUE_MAP[color_key], outline=COLOR_VALUE_MAP[color_key])
-            ttk.Label(row, text=COLOR_LABELS[color_key], style="CardTitle.TLabel").pack(side="left", padx=(8, 0))
+        self.legend_frame = ttk.Frame(side_panel, style="Card.TFrame", padding=(12, 10))
+        self.legend_frame.pack(fill="x", pady=(0, 16))
+        self._rebuild_legend()
 
         note_frame = ttk.Frame(side_panel, style="Card.TFrame", padding=(12, 10))
         note_frame.pack(fill="x")
@@ -662,10 +658,69 @@ class MapColoringApp:
             justify="left",
         ).pack(anchor="w")
 
+    def _load_dataset(self, dataset_label: str) -> None:
+        config = DATASET_OPTIONS[dataset_label]
+        self.current_dataset_key = config["key"]
+        self.solution_data = load_solution_data(config["solution"])
+        self.results = load_results(config["results"])
+        self.adjacency = load_adjacency(config["adjacency"])
+        self.conflicts = validate_assignment(self.solution_data["assignment"], self.adjacency)
+        (
+            self.province_shapes,
+            self.bounds,
+            self.island_shapes,
+            self.island_bounds,
+        ) = load_geojson_shapes(config["geojson"])
+
+        self.solution_color_count = len(
+            {color for color in self.solution_data["assignment"].values() if color != "Chua to"}
+        )
+        self.sequence = list(self.solution_data["sequence"])
+        self.display_names = dict(self.solution_data["display_names"])
+        self.used_colors = [
+            color for color in ["Do", "Xanh", "Vang", "Tim"]
+            if color in set(self.solution_data["assignment"].values())
+        ]
+        self.sequence_index = 0
+
+        self.solution_count_var.set(f"{self.solution_color_count} màu")
+        self.map_subtitle_var.set(f"Chế độ: {dataset_label} • Nghiệm hiện có: {self.solution_color_count} màu.")
+
+        if hasattr(self, "map_canvas"):
+            self.map_canvas.set_map_data(
+                self.province_shapes,
+                self.bounds,
+                self.island_shapes,
+                self.island_bounds,
+            )
+        if hasattr(self, "legend_frame"):
+            self._rebuild_legend()
+
+    def _rebuild_legend(self) -> None:
+        for child in self.legend_frame.winfo_children():
+            child.destroy()
+
+        ttk.Label(self.legend_frame, text="Bảng màu", style="CardTitle.TLabel").pack(anchor="w", pady=(0, 6))
+        legend_order = [color for color in self.used_colors]
+        legend_order.append("Chua to")
+        for color_key in legend_order:
+            row = ttk.Frame(self.legend_frame, style="Card.TFrame")
+            row.pack(anchor="w", fill="x", pady=1)
+            swatch = tk.Canvas(row, width=18, height=18, bg=CARD_BG, highlightthickness=0)
+            swatch.pack(side="left")
+            swatch.create_rectangle(1, 1, 17, 17, fill=COLOR_VALUE_MAP[color_key], outline=COLOR_VALUE_MAP[color_key])
+            ttk.Label(row, text=COLOR_LABELS[color_key], style="CardTitle.TLabel").pack(side="left", padx=(8, 0))
+
     def _reset_metrics(self) -> None:
         self.time_var.set("0.00 ms")
         self.steps_var.set("0")
         self.checks_var.set("0")
+
+    def _on_dataset_changed(self, _event=None) -> None:
+        self.has_run = False
+        self.last_run_algorithm = None
+        self._load_dataset(self.dataset_var.get())
+        self.refresh_dashboard()
 
     def _on_algorithm_changed(self, _event=None) -> None:
         self.has_run = False
@@ -695,9 +750,9 @@ class MapColoringApp:
 
     def refresh_dashboard(self) -> None:
         if self.conflicts:
-            conflict_message = f"Cảnh báo: còn {len(self.conflicts)} cặp tỉnh giáp nhau trùng màu theo adjacency_63.json."
+            conflict_message = f"Cảnh báo: còn {len(self.conflicts)} cặp tỉnh giáp nhau trùng màu theo adjacency_{self.current_dataset_key}.json."
         else:
-            conflict_message = "Kiểm tra theo adjacency_63.json: không có tỉnh giáp nhau trùng màu."
+            conflict_message = f"Kiểm tra theo adjacency_{self.current_dataset_key}.json: không có tỉnh giáp nhau trùng màu."
 
         if self.has_run:
             self._apply_selected_metrics()
@@ -707,6 +762,7 @@ class MapColoringApp:
             self.status_var.set("Chọn thuật toán rồi bấm Run.")
 
         self.info_var.set(
+            f"Chế độ: {self.dataset_var.get()}\n"
             f"Thuật toán: {self.algorithm_var.get()}\n"
             f"{conflict_message}"
         )
@@ -718,7 +774,7 @@ class MapColoringApp:
             self.animation_job = None
         self.map_canvas.apply_assignment({})
         if not keep_status and not self.has_run:
-            self.status_var.set("Chọn thuật toán rồi bấm Run để bắt đầu.")
+            self.status_var.set("Chọn thuật toán rồi bấm Run.")
 
     def show_full_solution(self) -> None:
         if self.animation_job is not None:
