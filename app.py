@@ -13,6 +13,7 @@ from visualization.name_normalizer import canonical_province_name
 
 ROOT = Path(__file__).resolve().parent
 DATA_PATH = ROOT / "data"
+RESULTS_PATH = ROOT / "experiments" / "results"
 
 COLORS_PATH = DATA_PATH / "colors.json"
 
@@ -35,16 +36,16 @@ REMOTE_ISLAND_MIN_LON = 111.5
 DATASET_OPTIONS = {
     "63 tỉnh/thành": {
         "key": "63",
-        "geojson": DATA_PATH / "vietnam_provinces.geojson",
-        "solution": DATA_PATH / "solution.json",
-        "results": DATA_PATH / "results_63.csv",
+        "geojson": DATA_PATH / "vietnam_provinces63.geojson",
+        "solution": RESULTS_PATH / "solution_63.json",
+        "results": RESULTS_PATH / "results_63.csv",
         "adjacency": DATA_PATH / "adjacency_63.json",
     },
     "34 tỉnh/thành": {
         "key": "34",
-        "geojson": DATA_PATH / "vietnam_regions_34.geojson",
-        "solution": DATA_PATH / "solution_34.json",
-        "results": DATA_PATH / "results_34.csv",
+        "geojson": DATA_PATH / "vietnam_province34.geojson",
+        "solution": RESULTS_PATH / "solution_34.json",
+        "results": RESULTS_PATH / "results_34.csv",
         "adjacency": DATA_PATH / "adjacency_34.json",
     },
 }
@@ -120,6 +121,13 @@ COLOR_VALUE_MAP = load_color_values(COLORS_PATH)
 
 
 def load_solution_data(path: Path) -> dict:
+    if not path.exists():
+        return {
+            "assignment": {},
+            "sequence": [],
+            "display_names": {},
+            "meta_by_algorithm": {},
+        }
     payload = json.loads(path.read_text(encoding="utf-8"))
     assignment_raw = payload.get("solution", {})
 
@@ -160,6 +168,8 @@ def load_solution_data(path: Path) -> dict:
 
 
 def load_results(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
     rows: list[dict] = []
     with path.open("r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
@@ -229,6 +239,8 @@ def load_geojson_shapes(
     dict[str, list[list[tuple[float, float]]]],
     tuple[float, float, float, float] | None,
 ]:
+    if not path.exists():
+        return {}, (0.0, 0.0, 0.0, 0.0), {}, None
     geojson = json.loads(path.read_text(encoding="utf-8"))
     mainland_shapes: dict[str, list[list[tuple[float, float]]]] = {}
     island_shapes: dict[str, list[list[tuple[float, float]]]] = {}

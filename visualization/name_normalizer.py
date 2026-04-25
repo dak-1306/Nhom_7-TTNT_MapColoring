@@ -11,6 +11,7 @@ SPECIAL_CASES = {
     "ba ria - vung tau": "ba ria vung tau",
     "ba ria vung tau": "ba ria vung tau",
     "thua thien hue": "thua thien hue",
+    "hue": "thua thien hue",
 }
 
 
